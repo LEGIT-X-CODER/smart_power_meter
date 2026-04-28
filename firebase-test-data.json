@@ -1,0 +1,64 @@
+{
+  "device_registry": {
+    "SPM-TEST01": {
+      "password": "test1234",
+      "linkedTo": null,
+      "firmwareVersion": "1.0.0",
+      "registeredAt": 1714300000000
+    },
+    "SPM-TEST02": {
+      "password": "device5678",
+      "linkedTo": null,
+      "firmwareVersion": "1.0.0",
+      "registeredAt": 1714300000000
+    }
+  },
+  "devices": {
+    "SPM-TEST01": {
+      "heartbeat": 9999999999999,
+      "switchState": false,
+      "manualOverride": false,
+      "lastCommand": 0,
+      "live": {
+        "voltage": 230.4,
+        "current": 1.82,
+        "currentPower": 419.3,
+        "totalEnergy": 1254.7
+      },
+      "schedule": {
+        "enabled": false,
+        "shutdownTimestamp": 0,
+        "startTimestamp": 0
+      },
+      "threshold": {
+        "enabled": false,
+        "value": 5,
+        "unit": "kWh",
+        "action": "notify"
+      }
+    },
+    "SPM-TEST02": {
+      "heartbeat": 9999999999999,
+      "switchState": true,
+      "manualOverride": false,
+      "lastCommand": 0,
+      "live": {
+        "voltage": 228.1,
+        "current": 0.45,
+        "currentPower": 102.6,
+        "totalEnergy": 387.2
+      },
+      "schedule": {
+        "enabled": false,
+        "shutdownTimestamp": 0,
+        "startTimestamp": 0
+      },
+      "threshold": {
+        "enabled": false,
+        "value": 2,
+        "unit": "kWh",
+        "action": "notify"
+      }
+    }
+  }
+}
