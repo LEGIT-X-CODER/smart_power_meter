@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BellOff, CheckCheck, Wifi, AlertTriangle, Activity, Zap } from 'lucide-react';
+import { BellOff, CheckCheck, Wifi, AlertTriangle, Activity, Zap, Clock } from 'lucide-react';
 import TopBar from '../components/layout/TopBar';
 import BottomNav from '../components/layout/BottomNav';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,6 +11,7 @@ const iconMap = {
   offline: { icon: Wifi, color: 'text-red-400', bg: 'bg-red-500/10' },
   online:  { icon: Wifi, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   threshold: { icon: AlertTriangle, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+  schedule: { icon: Clock, color: 'text-purple-400', bg: 'bg-purple-500/10' },
   high_consumption: { icon: Zap, color: 'text-orange-400', bg: 'bg-orange-500/10' },
   manual_override: { icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
 };

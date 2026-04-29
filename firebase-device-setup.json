@@ -1,0 +1,35 @@
+{
+  "device_registry": {
+    "SPM-A1B2C3": {
+      "password": "spm2026",
+      "linkedTo": null,
+      "firmwareVersion": "1.0.0",
+      "registeredAt": 1714300000000
+    }
+  },
+  "devices": {
+    "SPM-A1B2C3": {
+      "heartbeat": 0,
+      "switchState": false,
+      "manualOverride": false,
+      "lastCommand": 0,
+      "live": {
+        "voltage": 0,
+        "current": 0,
+        "currentPower": 0,
+        "totalEnergy": 0
+      },
+      "schedule": {
+        "enabled": false,
+        "shutdownTimestamp": 0,
+        "startTimestamp": 0
+      },
+      "threshold": {
+        "enabled": false,
+        "value": 5,
+        "unit": "kWh",
+        "action": "notify"
+      }
+    }
+  }
+}

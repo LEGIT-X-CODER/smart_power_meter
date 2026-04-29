@@ -1,7 +1,11 @@
-import { Zap, Activity, Gauge, BatteryCharging } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Zap, Activity, Gauge, BatteryCharging, IndianRupee, Settings2 } from 'lucide-react';
+import { ref, get, set } from 'firebase/database';
+import { rtdb } from '../../lib/firebase';
 import type { DeviceRTDB } from '../../types';
 
 interface Props {
+  deviceId: string;
   rtdb: DeviceRTDB | null;
   online: boolean;
 }
@@ -15,8 +19,36 @@ interface MetricItem {
   bg: string;
 }
 
-export default function LiveMetrics({ rtdb, online }: Props) {
-  const live = rtdb?.live;
+export default function LiveMetrics({ deviceId, rtdb: deviceRtdb, online }: Props) {
+  const live = deviceRtdb?.live;
+
+  // Rate setting (₹ per kWh)
+  const [rate, setRate] = useState(8.0); // default ₹8/kWh
+  const [editingRate, setEditingRate] = useState(false);
+  const [tempRate, setTempRate] = useState('8');
+
+  // Load saved rate from RTDB
+  useEffect(() => {
+    if (!deviceId) return;
+    get(ref(rtdb, `devices/${deviceId}/settings/ratePerKwh`)).then((snap) => {
+      if (snap.exists()) {
+        setRate(snap.val());
+        setTempRate(snap.val().toString());
+      }
+    });
+  }, [deviceId]);
+
+  const saveRate = async () => {
+    const val = parseFloat(tempRate);
+    if (isNaN(val) || val <= 0) return;
+    setRate(val);
+    setEditingRate(false);
+    await set(ref(rtdb, `devices/${deviceId}/settings/ratePerKwh`), val);
+  };
+
+  // Cost calculation
+  const energyKwh = (live?.totalEnergy ?? 0) / 1000;
+  const totalCost = energyKwh * rate;
 
   const metrics: MetricItem[] = [
     {
@@ -94,6 +126,74 @@ export default function LiveMetrics({ rtdb, online }: Props) {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Cost Card */}
+      <div className="glass-card p-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-orange-500/10 opacity-50" />
+        <div className="relative">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="bg-orange-500/10 text-orange-400 p-1.5 rounded-lg">
+                <IndianRupee size={14} />
+              </div>
+              <span className="text-slate-400 text-xs font-medium">Estimated Cost</span>
+            </div>
+            <button
+              id="edit-rate-btn"
+              onClick={() => { setEditingRate(!editingRate); setTempRate(rate.toString()); }}
+              className="text-slate-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-700/50"
+            >
+              <Settings2 size={14} />
+            </button>
+          </div>
+
+          {online ? (
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold text-orange-400">₹{totalCost.toFixed(2)}</span>
+              <span className="text-slate-400 text-sm">({energyKwh.toFixed(3)} kWh)</span>
+            </div>
+          ) : (
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold text-slate-600">—</span>
+            </div>
+          )}
+
+          <p className="text-slate-500 text-xs mt-1">
+            Rate: ₹{rate.toFixed(2)}/kWh
+          </p>
+
+          {/* Rate editor */}
+          {editingRate && (
+            <div className="mt-3 pt-3 border-t border-slate-700/50">
+              <label className="text-sm text-slate-300 font-medium mb-1.5 block">
+                Electricity Rate (₹ per kWh)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="rate-input"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={tempRate}
+                  onChange={(e) => setTempRate(e.target.value)}
+                  className="input-field flex-1"
+                  placeholder="8.0"
+                />
+                <button
+                  id="rate-save-btn"
+                  onClick={saveRate}
+                  className="btn-primary px-4 text-sm"
+                >
+                  Save
+                </button>
+              </div>
+              <p className="text-slate-500 text-[10px] mt-1.5">
+                Common rates: ₹3-5 (subsidized), ₹6-8 (domestic), ₹8-12 (commercial)
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {!online && (

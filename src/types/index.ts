@@ -70,7 +70,7 @@ export interface AppNotification {
   userId: string;
   deviceId: string;
   deviceName?: string;
-  type: 'threshold' | 'offline' | 'high_consumption' | 'manual_override' | 'online';
+  type: 'threshold' | 'schedule' | 'offline' | 'high_consumption' | 'manual_override' | 'online';
   message: string;
   read: boolean;
   createdAt: number;
