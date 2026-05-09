@@ -6,6 +6,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <math.h>
+#include <time.h>
 
 // ---------------- WIFI ----------------
 #define WIFI_SSID "Nitro1"
@@ -115,6 +116,18 @@ void connectWiFi(){
 
   Serial.println("\nWiFi Connected");
   Serial.println(WiFi.localIP());
+
+  // Sync time via NTP (needed for real Unix timestamps)
+  configTime(19800, 0, "pool.ntp.org", "time.nist.gov");  // IST = UTC+5:30 = 19800 sec
+  Serial.print("Syncing NTP time");
+  struct tm timeinfo;
+  int attempts = 0;
+  while(!getLocalTime(&timeinfo) && attempts < 10){
+    Serial.print(".");
+    delay(500);
+    attempts++;
+  }
+  Serial.println(" Done");
 
   digitalWrite(LED_PIN,HIGH);
 }
@@ -285,11 +298,20 @@ void uploadMetrics(){
   Serial.println("Metrics Uploaded");
 }
 
+// ---------------- TIME HELPER ----------------
+unsigned long long getUnixMillis(){
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return (unsigned long long)tv.tv_sec * 1000ULL + (unsigned long long)(tv.tv_usec / 1000);
+}
+
 // ---------------- FIRESTORE ----------------
 void uploadPowerLog(){
   if(!Firebase.ready()) return;
 
   dataBlink();
+
+  unsigned long long unixMs = getUnixMillis();
 
   FirebaseJson content;
   FirebaseJson fields;
@@ -299,11 +321,15 @@ void uploadPowerLog(){
   fields.set("current/doubleValue",current);
   fields.set("power/doubleValue",currentPower);
   fields.set("totalEnergy/doubleValue",totalEnergy);
-  fields.set("timestamp/integerValue",String(millis()/1000));
+
+  // Use real Unix timestamp in milliseconds (matches JavaScript Date.now())
+  char tsStr[20];
+  sprintf(tsStr, "%llu", unixMs);
+  fields.set("timestamp/integerValue", tsStr);
 
   content.set("fields",fields);
 
-  String documentId = String(DEVICE_ID)+"_"+String(millis());
+  String documentId = String(DEVICE_ID)+"_"+String(tsStr);
 
   bool success = Firebase.Firestore.createDocument(
     &fbdo,
